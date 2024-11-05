@@ -10,6 +10,7 @@ namespace WFO.WebAPI.Controllers.Product
 {
     [Route("api/category")]
     [ApiController]
+    [Authorize]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
@@ -19,6 +20,7 @@ namespace WFO.WebAPI.Controllers.Product
             _categoryService = categoryService;
         }
 
+        [AllowAnonymous]
         [HttpGet("all")]
         public IActionResult All(FilterDto input)
         {
@@ -32,15 +34,45 @@ namespace WFO.WebAPI.Controllers.Product
             }
         }
 
-        [Authorize]
         [AuthorizationFilter("Admin")]
         [HttpPost("add")]
-        public IActionResult AddCategory(CreateCategoryDto input)
+        public async Task<IActionResult> AddCategory([FromForm] CreateCategoryDto input)
         {
             try
             {
-                _categoryService.AddCategory(input);
-                return Ok("Thêm danh mục sản phẩm thành công");
+                var newCategory = await _categoryService.AddCategory(input);
+                return Ok(newCategory);
+                //return Ok("Thêm danh mục sản phẩm thành công");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [AuthorizationFilter("Admin")]
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateCategory([FromForm] UpdateCategoryDto input)
+        {
+            try
+            {
+                var updatedCategory = await _categoryService.UpdateCategory(input);
+                return Ok(updatedCategory);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [AuthorizationFilter("Admin")]
+        [HttpDelete("delete")]
+        public IActionResult DeleteCategory(int categoryId)
+        {
+            try
+            {
+                _categoryService.DeleteCategory(categoryId);
+                return Ok("Xóa thể loại thành công");
             }
             catch (Exception ex)
             {

@@ -11,7 +11,9 @@ namespace WFO.Product.ApplicationService.CategoryModule.Abstracts
 {
     public interface ICategoryService
     {
-        public void AddCategory(CreateCategoryDto input);
         public PageResultDto<ProdCategory> GetAll(FilterDto input);
+        public Task<ProdCategory> AddCategory(CreateCategoryDto input);
+        public Task<ProdCategory> UpdateCategory(UpdateCategoryDto input);
+        public void DeleteCategory(int categorieId);
     }
 }
