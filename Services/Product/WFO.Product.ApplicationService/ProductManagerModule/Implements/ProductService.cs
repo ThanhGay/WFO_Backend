@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using WFO.Product.ApplicationService.Common;
 using WFO.Product.ApplicationService.ProductManagerModule.Abstracts;
@@ -137,7 +138,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
             else
             {
                 var result = _dbContext
-                    .ProductCategories.Where(pc => pc.Id == pc.Id)
+                    .ProductCategories.Where(pc => pc.ProductId == id)
                     .Join(
                         _dbContext.Products,
                         (pc => pc.ProductId),
@@ -265,6 +266,99 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
             result.Items = query.ToList();
 
             return result;
+        }
+
+        public async Task<ProdProduct> UpdateProduct(UpdateProductDto input)
+        {
+            var existProuduct = await _dbContext.Products.FirstOrDefaultAsync(prod =>
+                prod.Id == input.Id
+            );
+            var existProductNameSize = await _dbContext.Products.AnyAsync(prod =>
+                prod.Id != input.Id && prod.Name == input.Name && prod.Size == input.Size
+            );
+            var existCategory = await _dbContext.Categories.AnyAsync(c => c.Id == input.CategoryId);
+            var existProductInCategory = await _dbContext.ProductCategories.FirstOrDefaultAsync(
+                pc => pc.ProductId == input.Id
+            );
+
+            if (!existProductNameSize)
+            {
+                if (existProuduct != null)
+                {
+                    string? createdImageName = null;
+
+                    if (input.ImageFile != null)
+                    {
+                        string[] allowedFileExtentions = [".jpg", ".jpeg", ".png"];
+
+                        var ext = Path.GetExtension(input.ImageFile.FileName);
+                        if (!allowedFileExtentions.Contains(ext))
+                        {
+                            throw new ArgumentException(
+                                $"Only {string.Join(",", allowedFileExtentions)} are allowed."
+                            );
+                        }
+
+                        if (input.ImageFile.Length > 0)
+                        {
+                            var path = Path.Combine(
+                                Directory.GetCurrentDirectory(),
+                                "wwwroot",
+                                "Images",
+                                input.ImageFile.FileName
+                            );
+                            using (var stream = System.IO.File.Create(path))
+                            {
+                                await input.ImageFile.CopyToAsync(stream);
+                            }
+                            ;
+
+                            createdImageName = "/images/" + input.ImageFile.FileName;
+                        }
+                    }
+                    else
+                    {
+                        createdImageName = input.Image;
+                    }
+
+                    existProuduct.Name = input.Name;
+                    existProuduct.Description = input.Description;
+                    existProuduct.Price = input.Price;
+                    existProuduct.Size = input.Size;
+                    existProuduct.UpdateDate = DateTime.Now;
+                    existProuduct.Image = createdImageName;
+
+                    if (input.CategoryId != null && existCategory)
+                    {
+                        if (existProductInCategory != null)
+                        {
+                            existProductInCategory.CategoryId = (int)input.CategoryId;
+                        }
+                        else
+                        {
+                            _dbContext.ProductCategories.Add(
+                                new ProdProductCategory
+                                {
+                                    CategoryId = (int)input.CategoryId,
+                                    ProductId = input.Id,
+                                }
+                            );
+                        }
+                    }
+
+                    _dbContext.SaveChanges();
+
+                    return existProuduct;
+                }
+                else
+                {
+                    throw new Exception($"Không tồn tại sản phẩm có Id {input.Id}");
+                }
+            }
+            else
+            {
+                throw new Exception($"Đã tồn tại sản phẩm có tên {input.Name} size {input.Size}");
+            }
         }
     }
 }

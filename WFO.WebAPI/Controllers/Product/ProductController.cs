@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WFO.Auth.Dtos.Authorization;
 using WFO.Product.ApplicationService.ProductManagerModule.Abstracts;
-using WFO.Shared.Dtos.Common;
 using WFO.Product.Dtos.ProductManagerModule;
-
+using WFO.Shared.Dtos.Common;
 
 namespace WFO.WebAPI.Controllers.Product
 {
@@ -23,13 +22,30 @@ namespace WFO.WebAPI.Controllers.Product
         [Authorize]
         [AuthorizationFilter("Admin")]
         [HttpPost("add")]
-        public async Task<IActionResult> Create([FromForm]CreateProductDto input)
+        public async Task<IActionResult> Create([FromForm] CreateProductDto input)
         {
             try
             {
                 var createdProduct = await _productService.CreateProduct(input);
                 return Ok(createdProduct);
                 //return Ok("Thêm sản phẩm thành công");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [AuthorizationFilter("Admin")]
+        [HttpPut("update")]
+        public async Task<IActionResult> Update([FromForm] UpdateProductDto input)
+        {
+            try
+            {
+                var updatedProduct = await _productService.UpdateProduct(input);
+                return Ok(updatedProduct);
+                //return Ok("Cập nhật sản phẩm thành công");
             }
             catch (Exception ex)
             {
@@ -68,7 +84,8 @@ namespace WFO.WebAPI.Controllers.Product
         {
             try
             {
-                return Ok(_productService.Get(id));
+                var foundProduct = _productService.Get(id);
+                return Ok(foundProduct);
             }
             catch (Exception ex)
             {
