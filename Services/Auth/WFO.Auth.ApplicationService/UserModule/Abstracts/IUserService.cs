@@ -10,8 +10,10 @@ namespace WFO.Auth.ApplicationService.UserModule.Abstracts
 {
     public interface IUserService
     {
-        void CreateUser(CreateUserDto input);
-        ReturnUserDto Login(LoginDto input);
-        List<AuthUser> GetAll();
+        public void CreateUser(CreateUserDto input);
+        public ReturnUserDto Login(LoginDto input);
+        public List<AuthUser> GetAll();
+        public void UpdateUser(UpdateInforUserDto input, int UserId);
+        public void DeleteUser(int id);
     }
 }

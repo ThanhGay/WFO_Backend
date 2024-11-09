@@ -76,6 +76,7 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
                         Address = existAccount.Address,
                         DateOfBirth = existAccount.DateOfBirth,
                         Phone = existAccount.Phone,
+                        Sex = existAccount.Sex,
                     };
                     return result;
                 }
@@ -88,6 +89,31 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
             {
                 throw new Exception($"Email chưa được đăng ký");
             }
+        }
+
+        public void UpdateUser(UpdateInforUserDto input, int UserId)
+        {
+            var existUser = _dbContext.Users.FirstOrDefault(u => u.Id == UserId);
+            if (existUser != null)
+            {
+                existUser.FirstName = input.FirstName;
+                existUser.LastName = input.LastName;
+                existUser.Sex = input.Sex;
+                existUser.DateOfBirth = input.DateOfBirth;
+                existUser.Phone = input.Phone;
+
+                _dbContext.Users.Update(existUser);
+                _dbContext.SaveChanges();
+            }
+            else
+            {
+                throw new Exception("Không tìm thấy tài khoản");
+            }
+        }
+
+        public void DeleteUser(int id)
+        {
+            throw new NotImplementedException();
         }
 
         private string CreateToken(AuthUser user)

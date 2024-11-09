@@ -132,25 +132,18 @@ namespace WFO.Order.ApplicationService.CartModule.Implements
         {
             var result = new PageResultDto<CartItemDto>();
 
+            //get record in Cart table with MyCustomerId
             var listProdQuery = _dbContext.Carts.Where(c => c.CustomerId == customerId).ToList();
-            foreach (var item in listProdQuery)
-            {
-                Console.WriteLine("yyy", item);
-            }
 
+            // save information of product into list
             var tmpList = new List<ProductDto>();
-
             foreach (var item in listProdQuery)
             {
                 var productItem = _productInforService.GetProduct(item.ProductId);
                 tmpList.Add(productItem);
             }
 
-            foreach (var item in tmpList)
-            {
-                Console.WriteLine("xx", item.Id, item.Name);
-            }
-
+            // join list
             var finalQuery = listProdQuery.Join(
                 tmpList,
                 cart => cart.ProductId,
