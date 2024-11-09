@@ -29,7 +29,7 @@ namespace WFO.WebAPI.Controllers.Order
             _contextAccessor = httpContextAccessor;
         }
 
-        [HttpGet]
+        [HttpGet("my-cart")]
         public IActionResult GetMyCart(FilterDto input)
         {
             try
@@ -43,7 +43,7 @@ namespace WFO.WebAPI.Controllers.Order
             }
         }
 
-        [HttpPost]
+        [HttpPost("add-to-cart")]
         public IActionResult AddToCart(AddToCartDto input)
         {
             try
@@ -51,6 +51,51 @@ namespace WFO.WebAPI.Controllers.Order
                 var customerId = _userInforService.GetCurrentUserId(_contextAccessor);
                 _cartService.AddToCart(input, customerId);
                 return Ok($"Thêm sản phẩm cho customerId: {customerId} thành công");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("increase/{id}")]
+        public IActionResult IncreaseQuantity(int id)
+        {
+            try
+            {
+                var customerId = _userInforService.GetCurrentUserId(_contextAccessor);
+                _cartService.IncreaseQuantity(id, customerId);
+                return Ok("Đă tăng 1.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("decrease/{id}")]
+        public IActionResult DecreaseQuantity(int id)
+        {
+            try
+            {
+                var customerId = _userInforService.GetCurrentUserId(_contextAccessor);
+                _cartService.DecreaseQuantity(id, customerId);
+                return Ok("Đã giảm 1");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("delete/{id}")]
+        public IActionResult DeleteCart(int id)
+        {
+            try
+            {
+                var customerId = _userInforService.GetCurrentUserId(_contextAccessor);
+                _cartService.RemoveFromCart(id, customerId);
+                return Ok("Đã xóa sản phẩm khỏi giỏ hàng của bạn");
             }
             catch (Exception ex)
             {

@@ -35,11 +35,13 @@ namespace WFO.Order.ApplicationService.CartModule.Implements
             var existItem = _dbContext.Carts.FirstOrDefault(c =>
                 c.ProductId == input.ProductId && c.CustomerId == customerId
             );
+
             if (existProduct)
             {
                 if (existItem != null)
                 {
                     existItem.Quantity += input.Quantity;
+                    existItem.Note = input.Note;
                 }
                 else
                 {
@@ -61,11 +63,80 @@ namespace WFO.Order.ApplicationService.CartModule.Implements
             }
         }
 
-        public PageResultDto<CartItemDto> GetMyCart (FilterDto input, int customerId)
+        public void DecreaseQuantity(int cartId, int customerId)
+        {
+            var existCartItem = _dbContext.Carts.FirstOrDefault(c =>
+                c.Id == cartId && c.CustomerId == customerId
+            );
+
+            if (existCartItem != null)
+            {
+                if (existCartItem.Quantity > 1)
+                {
+                    existCartItem.Quantity -= 1;
+                }
+                else
+                {
+                    _dbContext.Carts.Remove(existCartItem);
+                }
+
+                _dbContext.SaveChanges();
+            }
+            else
+            {
+                throw new Exception(
+                    $"Không tìm thấy giỏ hàng có Id \"{cartId}\" hoặc bạn không có quyền thay đổi số lượng."
+                );
+            }
+        }
+
+        public void IncreaseQuantity(int cartId, int customerId)
+        {
+            var existCartItem = _dbContext.Carts.FirstOrDefault(c =>
+                c.Id == cartId && c.CustomerId == customerId
+            );
+
+            if (existCartItem != null)
+            {
+                existCartItem.Quantity += 1;
+                _dbContext.SaveChanges();
+            }
+            else
+            {
+                throw new Exception(
+                    $"Không tìm thấy giỏ hàng có Id \"{cartId}\" hoặc bạn không có quyền thay đổi số lượng."
+                );
+            }
+        }
+
+        public void RemoveFromCart(int cartId, int customerId)
+        {
+            var existCartItem = _dbContext.Carts.FirstOrDefault(c =>
+                c.Id == cartId && c.CustomerId == customerId
+            );
+
+            if (existCartItem != null)
+            {
+                _dbContext.Carts.Remove(existCartItem);
+                _dbContext.SaveChanges();
+            }
+            else
+            {
+                throw new Exception(
+                    $"Không tìm thấy giỏ hàng có Id \"{cartId}\" hoặc bạn không có quyền xóa nó."
+                );
+            }
+        }
+
+        public PageResultDto<CartItemDto> GetMyCart(FilterDto input, int customerId)
         {
             var result = new PageResultDto<CartItemDto>();
 
             var listProdQuery = _dbContext.Carts.Where(c => c.CustomerId == customerId).ToList();
+            foreach (var item in listProdQuery)
+            {
+                Console.WriteLine("yyy", item);
+            }
 
             var tmpList = new List<ProductDto>();
 
@@ -75,21 +146,34 @@ namespace WFO.Order.ApplicationService.CartModule.Implements
                 tmpList.Add(productItem);
             }
 
-            var finalQuery = listProdQuery.Join(tmpList, cart => cart.ProductId, tmp => tmp.Id, (cart, tmp) => new CartItemDto()
+            foreach (var item in tmpList)
             {
-                Id = cart.Id,
-                ProductName = tmp.Name,
-                ProductSize = tmp.Size,
-                ProductId = tmp.Id,
-                ProductImage = tmp.Image,
-                Note = cart.Note,
-                ProductPrice = tmp.Price,
-                Quantity = cart.Quantity,
-            });
+                Console.WriteLine("xx", item.Id, item.Name);
+            }
+
+            var finalQuery = listProdQuery.Join(
+                tmpList,
+                cart => cart.ProductId,
+                tmp => tmp.Id,
+                (cart, tmp) =>
+                    new CartItemDto()
+                    {
+                        Id = cart.Id,
+                        ProductName = tmp.Name,
+                        ProductSize = tmp.Size,
+                        ProductId = tmp.Id,
+                        ProductImage = tmp.Image,
+                        Note = cart.Note,
+                        ProductPrice = tmp.Price,
+                        Quantity = cart.Quantity,
+                    }
+            );
 
             if (!string.IsNullOrEmpty(input.Keyword))
             {
-                finalQuery = finalQuery.Where(s => s.ProductName.ToLower().Contains(input.Keyword.ToLower()));
+                finalQuery = finalQuery.Where(s =>
+                    s.ProductName.ToLower().Contains(input.Keyword.ToLower())
+                );
             }
 
             int totalItems = finalQuery.Count();

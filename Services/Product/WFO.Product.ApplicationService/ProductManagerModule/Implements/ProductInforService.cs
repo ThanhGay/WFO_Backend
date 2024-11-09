@@ -51,7 +51,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
             else
             {
                 var result = _dbContext
-                    .ProductCategories.Where(pc => pc.Id == pc.Id)
+                    .ProductCategories.Where(pc => pc.ProductId == id)
                     .Join(
                         _dbContext.Products,
                         (pc => pc.ProductId),

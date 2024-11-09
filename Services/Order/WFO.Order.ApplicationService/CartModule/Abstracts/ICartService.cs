@@ -13,5 +13,8 @@ namespace WFO.Order.ApplicationService.CartModule.Abstracts
     {
         public void AddToCart(AddToCartDto input, int customerId);
         public PageResultDto<CartItemDto> GetMyCart(FilterDto input, int customerId);
+        public void IncreaseQuantity(int id, int customerId);
+        public void DecreaseQuantity(int id, int customerId);
+        public void RemoveFromCart(int id, int customerId);
     }
 }
