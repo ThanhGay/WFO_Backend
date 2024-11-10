@@ -22,6 +22,7 @@ namespace WFO.Product.Domain
         public int Price { get; set; }
         public string? Image { get; set; }
         public required string Size { get; set; }
+        public bool IsAvailable { get; set; }
         public DateTime? CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
     }

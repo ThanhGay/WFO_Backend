@@ -68,6 +68,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
                     CreateDate = DateTime.Now,
                     UpdateDate = DateTime.Now,
                     Image = createdImageName,
+                    IsAvailable = true,
                 };
 
                 _dbContext.Products.Add(newProduct);
@@ -105,7 +106,18 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
 
         public void DeleteProduct(int id)
         {
-            throw new NotImplementedException();
+            var existProduct = _dbContext.Products.FirstOrDefault(c => c.Id == id);
+            if (existProduct != null)
+            {
+                existProduct.IsAvailable = false;
+
+                _dbContext.Products.Update(existProduct);
+                _dbContext.SaveChanges();
+            }
+            else
+            {
+                throw new Exception($"Không tồn tại sản phẩm có Id \"{id}\"");
+            }
         }
 
         public ProductDto Get(int id)
@@ -114,7 +126,9 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
             var existProdCate = _dbContext.ProductCategories.Any(c => c.ProductId == id);
             if (!existProduct)
             {
-                throw new Exception($"Không tồn tại sản phẩm có Id: {id}");
+                throw new Exception(
+                    $"Không tồn tại sản phẩm có Id: {id} hoặc sản phẩm đã ngừng kinh doanh"
+                );
             }
             else if (!existProdCate)
             {
@@ -177,6 +191,46 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
         }
 
         public PageResultDto<ProductDto> GetAll(FilterDto input)
+        {
+            var result = new PageResultDto<ProductDto>();
+
+            var query =
+                from p in _dbContext.Products
+                join pc in _dbContext.ProductCategories
+                    on p.Id equals pc.ProductId
+                    into productCategories
+                from pc in productCategories.DefaultIfEmpty()
+                join c in _dbContext.Categories on pc.CategoryId equals c.Id into categories
+                from c in categories.DefaultIfEmpty()
+                where p.IsAvailable == true
+                select new ProductDto
+                {
+                    Name = p.Name,
+                    Size = p.Size,
+                    Id = p.Id,
+                    Description = p.Description,
+                    Image = p.Image,
+                    Price = p.Price,
+                    CategoryId = pc.CategoryId,
+                    CategoryName = c.Name,
+                };
+
+            if (!string.IsNullOrEmpty(input.Keyword))
+            {
+                query = query.Where(prod => prod.Name.ToLower().Contains(input.Keyword.ToLower()));
+            }
+
+            var totalItems = query.Count();
+
+            query = query.Skip(input.SkipCount()).Take(input.PageSize);
+
+            result.TotalItem = totalItems;
+            result.Items = query.ToList();
+
+            return result;
+        }
+
+        public PageResultDto<ProductDto> GetAllByAdmin(FilterDto input)
         {
             var result = new PageResultDto<ProductDto>();
 

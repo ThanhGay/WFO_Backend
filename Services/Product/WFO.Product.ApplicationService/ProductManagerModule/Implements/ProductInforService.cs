@@ -18,7 +18,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
 
         public bool HasProduct(int id)
         {
-            return _dbContext.Products.Any(prod => prod.Id == id);
+            return _dbContext.Products.Any(prod => prod.Id == id && prod.IsAvailable == true);
         }
 
         public ProductDto GetProduct(int id)
@@ -43,6 +43,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
                         Price = prod.Price,
                         CategoryId = null,
                         CategoryName = null,
+                        IsAvailable = prod.IsAvailable,
                     })
                     .ToList();
 
@@ -65,6 +66,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
                                 prod.Description,
                                 prod.Image,
                                 prod.Price,
+                                prod.IsAvailable,
                                 pc.CategoryId,
                                 CategoryName = _dbContext
                                     .Categories.Where(c => c.Id == pc.CategoryId)
@@ -80,6 +82,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
                         Description = p.Description,
                         Image = p.Image,
                         Price = p.Price,
+                        IsAvailable = p.IsAvailable,
                         CategoryId = p.CategoryId,
                         CategoryName = p.CategoryName[0],
                     })

@@ -16,5 +16,6 @@ namespace WFO.Product.Dtos.ProductManagerModule
         public required string Size { get; set; }
         public int? CategoryId { get; set; }
         public string? CategoryName { get; set; }
+        public bool IsAvailable { get; set; }
     }
 }

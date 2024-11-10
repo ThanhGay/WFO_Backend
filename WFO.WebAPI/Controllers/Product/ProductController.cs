@@ -66,6 +66,21 @@ namespace WFO.WebAPI.Controllers.Product
             }
         }
 
+        [Authorize]
+        [AuthorizationFilter("Admin")]
+        [HttpGet("list-product")]
+        public IActionResult ListProduct(FilterDto input)
+        {
+            try
+            {
+                return Ok(_productService.GetAllByAdmin(input));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("all/{categoryId}")]
         public IActionResult AllByCategory(FilterDto input, int categoryId)
         {
@@ -93,6 +108,8 @@ namespace WFO.WebAPI.Controllers.Product
             }
         }
 
+        [Authorize]
+        [AuthorizationFilter("Admin")]
         [HttpDelete("delete")]
         public IActionResult Delete(int id)
         {

@@ -15,6 +15,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Abstracts
         public Task<ProdProduct> UpdateProduct(UpdateProductDto input);
         public void DeleteProduct(int id);
         public PageResultDto<ProductDto> GetAll(FilterDto input);
+        public PageResultDto<ProductDto> GetAllByAdmin(FilterDto input);
         public ProductDto Get(int id);
         public PageResultDto<ProductDto> GetAllByCategory(FilterDto input, int categoryId);
     }

@@ -59,7 +59,7 @@ namespace WFO.Order.ApplicationService.CartModule.Implements
             }
             else
             {
-                throw new Exception($"Không tồn tại sản phẩm có Id: {input.ProductId}");
+                throw new Exception($"Sản phẩm có Id: {input.ProductId} không có sẵn");
             }
         }
 
@@ -159,6 +159,7 @@ namespace WFO.Order.ApplicationService.CartModule.Implements
                         Note = cart.Note,
                         ProductPrice = tmp.Price,
                         Quantity = cart.Quantity,
+                        IsAvailable = tmp.IsAvailable,
                     }
             );
 

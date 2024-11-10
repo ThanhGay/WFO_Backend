@@ -16,5 +16,6 @@ namespace WFO.Order.Dtos.CartModule
         public required string ProductSize { get; set; }
         public int Quantity { get; set; }
         public string? Note { get; set; }
+        public bool IsAvailable { get; set; }
     }
 }
