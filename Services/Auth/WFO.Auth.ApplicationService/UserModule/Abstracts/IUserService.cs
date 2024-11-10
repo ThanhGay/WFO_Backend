@@ -15,5 +15,7 @@ namespace WFO.Auth.ApplicationService.UserModule.Abstracts
         public List<AuthUser> GetAll();
         public void UpdateUser(UpdateInforUserDto input, int UserId);
         public void DeleteUser(int id);
+        public void ResetPassword(ResetPasswordDto input);
+        public void SendOtp(RequestOtpDto input);
     }
 }

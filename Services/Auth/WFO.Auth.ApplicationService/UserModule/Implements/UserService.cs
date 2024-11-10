@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -20,6 +23,13 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
     public class UserService : AuthServiceBase, IUserService
     {
         private readonly Jwtsettings _jwtsettings;
+
+        /// <summary>
+        /// send mail
+        /// </summary>
+        private static int wrongOTP = 0;
+        private const string senderEmail = "phoduchoa611@gmail.com";
+        private const string senderPassword = "zocxeivcdogsiheu";
 
         public UserService(
             ILogger<UserService> logger,
@@ -116,6 +126,59 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
             throw new NotImplementedException();
         }
 
+        public void ResetPassword(ResetPasswordDto input)
+        {
+            var existAccount = _dbContext.Users.FirstOrDefault(u => u.Email == input.Email);
+            if (existAccount != null)
+            {
+                var trueOtp = VerifyOtp(existAccount.Id, input.Otp);
+                if (trueOtp)
+                {
+                    existAccount.OTP = null;
+                    _dbContext.SaveChanges();
+                    wrongOTP = 0;
+                }
+                else
+                {
+                    wrongOTP += 1;
+                    if (wrongOTP > 5)
+                    {
+                        existAccount.OTP = null;
+                        _dbContext.SaveChanges();
+                        wrongOTP = 0;
+                        throw new Exception("Sai quá 5 lần. Vui lòng thử lại trong giây lát");
+                    }
+                    throw new Exception($"OTP không chính xác. Còn {6 - wrongOTP} lần");
+                }
+            }
+            else
+            {
+                throw new Exception("Email chưa được đăng ký tài khoản");
+            }
+        }
+
+        public void SendOtp(RequestOtpDto input)
+        {
+            Random rd = new Random();
+
+            var existUser = _dbContext.Users.FirstOrDefault(u => u.Email == input.Email);
+            if (existUser != null)
+            {
+                int otpNum = rd.Next(100000, 999999);
+                string otpStr = otpNum.ToString();
+
+                SendMail(existUser.Email, "Mã OTP của bạn là: " + otpStr);
+
+                existUser.OTP = otpStr;
+                _dbContext.SaveChanges();
+                wrongOTP = 0;
+            }
+            else
+            {
+                throw new Exception("Email chưa được đăng ký tài khoản");
+            }
+        }
+
         private string CreateToken(AuthUser user)
         {
             var claims = new List<Claim>
@@ -137,6 +200,44 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private void SendMail(string receiveEmail, string body)
+        {
+            // Tạo một đối tượng MailMessage
+            MailMessage mail = new MailMessage();
+            mail.From = new MailAddress(senderEmail);
+            mail.To.Add(receiveEmail);
+            mail.Subject = "[C# .NET] Email verification code";
+            mail.Body = "Đây là email được gửi từ ASP.Net\n" + body;
+
+            // Tạo một đối tượng SmtpClient
+            SmtpClient smtpClient = new SmtpClient("smtp.gmail.com");
+            smtpClient.Port = 587;
+            smtpClient.Credentials = new NetworkCredential(senderEmail, senderPassword);
+            smtpClient.EnableSsl = true;
+
+            try
+            {
+                smtpClient.Send(mail);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        private bool VerifyOtp(int id, string otp)
+        {
+            var existUser = _dbContext.Users.FirstOrDefault(u => u.Id == id);
+            if (existUser != null)
+            {
+                return existUser.OTP == otp;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

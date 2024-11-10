@@ -103,5 +103,43 @@ namespace WFO.WebAPI.Controllers.Auth
                 return BadRequest(ex.Message);
             }
         }
+
+        /// <summary>
+        /// Gửi mã OTP xác nhận email đổi mật khâu
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [HttpPost("generate")]
+        public IActionResult GenerateOtp(RequestOtpDto input)
+        {
+            try
+            {
+                _userService.SendOtp(input);
+                return Ok("Đã gửi OTP về mail của bạn");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Người dùng quên mật khẩu
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [HttpPost("reset-pw")]
+        public IActionResult ResetPassword(ResetPasswordDto input)
+        {
+            try
+            {
+                _userService.ResetPassword(input);
+                return Ok("Mật khẩu đã được thay đổi");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
