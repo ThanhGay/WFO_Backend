@@ -23,22 +23,22 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
     public class UserService : AuthServiceBase, IUserService
     {
         private readonly Jwtsettings _jwtsettings;
-
+        private readonly IConfiguration _configuration;
         /// <summary>
         /// send mail
         /// </summary>
         private static int wrongOTP = 0;
-        private const string senderEmail = "phoduchoa611@gmail.com";
-        private const string senderPassword = "zocxeivcdogsiheu";
 
         public UserService(
             ILogger<UserService> logger,
             AuthDbContext dbContext,
-            Jwtsettings jwtSettings
+            Jwtsettings jwtSettings,
+            IConfiguration configuration
         )
             : base(logger, dbContext)
         {
             _jwtsettings = jwtSettings;
+            _configuration = configuration;
         }
 
         public List<AuthUser> GetAll()
@@ -206,7 +206,7 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
         {
             // Tạo một đối tượng MailMessage
             MailMessage mail = new MailMessage();
-            mail.From = new MailAddress(senderEmail);
+            mail.From = new MailAddress(_configuration["SmtpGmail:senderEmail"]);
             mail.To.Add(receiveEmail);
             mail.Subject = "[C# .NET] Email verification code";
             mail.Body = "Đây là email được gửi từ ASP.Net\n" + body;
@@ -214,7 +214,7 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
             // Tạo một đối tượng SmtpClient
             SmtpClient smtpClient = new SmtpClient("smtp.gmail.com");
             smtpClient.Port = 587;
-            smtpClient.Credentials = new NetworkCredential(senderEmail, senderPassword);
+            smtpClient.Credentials = new NetworkCredential(_configuration["SmtpGmail:senderEmail"], _configuration["SmtpGmail:senderPassword"]);
             smtpClient.EnableSsl = true;
 
             try
