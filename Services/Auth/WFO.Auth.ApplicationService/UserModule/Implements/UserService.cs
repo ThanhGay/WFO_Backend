@@ -101,7 +101,7 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
             }
         }
 
-        public void UpdateUser(UpdateInforUserDto input, int UserId)
+        public ReturnUserDto UpdateUser(UpdateInforUserDto input, int UserId)
         {
             var existUser = _dbContext.Users.FirstOrDefault(u => u.Id == UserId);
             if (existUser != null)
@@ -111,9 +111,25 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
                 existUser.Sex = input.Sex;
                 existUser.DateOfBirth = input.DateOfBirth;
                 existUser.Phone = input.Phone;
+                existUser.Address = input.Address;
 
                 _dbContext.Users.Update(existUser);
                 _dbContext.SaveChanges();
+
+                var result = new ReturnUserDto
+                {
+                    FirstName = existUser.FirstName,
+                    LastName = existUser.LastName,
+                    Sex = existUser.Sex,
+                    Email = existUser.Email,
+                    Address = existUser.Address,
+                    DateOfBirth = existUser.DateOfBirth,
+                    Phone = existUser.Phone,
+                    FullName = (existUser.FirstName + " " + existUser.LastName).Trim(),
+                    Type = existUser.Role,
+                    Token = ""
+                };
+                return result;
             }
             else
             {

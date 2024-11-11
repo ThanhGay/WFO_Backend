@@ -13,7 +13,7 @@ namespace WFO.Auth.ApplicationService.UserModule.Abstracts
         public void CreateUser(CreateUserDto input);
         public ReturnUserDto Login(LoginDto input);
         public List<AuthUser> GetAll();
-        public void UpdateUser(UpdateInforUserDto input, int UserId);
+        public ReturnUserDto UpdateUser(UpdateInforUserDto input, int UserId);
         public void DeleteUser(int id);
         public void ResetPassword(ResetPasswordDto input);
         public void SendOtp(RequestOtpDto input);

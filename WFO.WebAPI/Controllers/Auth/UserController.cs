@@ -95,8 +95,8 @@ namespace WFO.WebAPI.Controllers.Auth
             try
             {
                 var customerId = _userInforService.GetCurrentUserId(_contextAccessor);
-                _userService.UpdateUser(input, customerId);
-                return Ok("Cập nhật thành công");
+                
+                return Ok(_userService.UpdateUser(input, customerId));
             }
             catch (Exception ex)
             {

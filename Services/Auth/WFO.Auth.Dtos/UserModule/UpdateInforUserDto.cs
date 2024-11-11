@@ -15,5 +15,6 @@ namespace WFO.Auth.Dtos.UserModule
         public string? Sex { get; set; }
         [Length(10, 10, ErrorMessage ="PhoneNumber have 10 digits")]
         public string? Phone { get; set; }
+        public string? Address { get; set; }
     }
 }
