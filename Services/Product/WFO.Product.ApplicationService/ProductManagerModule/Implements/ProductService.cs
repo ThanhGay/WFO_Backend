@@ -144,6 +144,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
                         Price = prod.Price,
                         CategoryId = null,
                         CategoryName = null,
+                        IsAvailable = prod.IsAvailable,
                     })
                     .ToList();
 
@@ -167,6 +168,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
                                 prod.Image,
                                 prod.Price,
                                 pc.CategoryId,
+                                prod.IsAvailable,
                                 CategoryName = _dbContext
                                     .Categories.Where(c => c.Id == pc.CategoryId)
                                     .Select(c => c.Name)
@@ -181,6 +183,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
                         Description = p.Description,
                         Image = p.Image,
                         Price = p.Price,
+                        IsAvailable= p.IsAvailable,
                         CategoryId = p.CategoryId,
                         CategoryName = p.CategoryName[0],
                     })
@@ -252,6 +255,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
                     Price = p.Price,
                     CategoryId = pc.CategoryId,
                     CategoryName = c.Name,
+                    IsAvailable = p.IsAvailable,
                 };
 
             if (!string.IsNullOrEmpty(input.Keyword))
