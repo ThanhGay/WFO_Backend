@@ -16,5 +16,6 @@ namespace WFO.Order.ApplicationService.CartModule.Abstracts
         public void IncreaseQuantity(int id, int customerId);
         public void DecreaseQuantity(int id, int customerId);
         public void RemoveFromCart(int id, int customerId);
+        public bool HasItemInCart(int id, int customerId);
     }
 }

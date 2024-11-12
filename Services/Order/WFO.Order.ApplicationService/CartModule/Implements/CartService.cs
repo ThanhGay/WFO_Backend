@@ -179,5 +179,10 @@ namespace WFO.Order.ApplicationService.CartModule.Implements
 
             return result;
         }
+
+        public bool HasItemInCart(int Id, int CustomerId)
+        {
+            return _dbContext.Carts.Any(c => c.Id == Id && c.CustomerId == CustomerId);
+        }
     }
 }

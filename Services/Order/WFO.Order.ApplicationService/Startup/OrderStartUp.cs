@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using WFO.Order.ApplicationService.CartModule.Abstracts;
 using WFO.Order.ApplicationService.CartModule.Implements;
+using WFO.Order.ApplicationService.OrderManagementModule.Abstracts;
+using WFO.Order.ApplicationService.OrderManagementModule.Implements;
 using WFO.Order.Infrastructure;
 using WFO.Shared.Constant.Database;
 
@@ -42,6 +44,7 @@ namespace WFO.Order.ApplicationService.Startup
            );
 
             builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
         }
     }
 }
