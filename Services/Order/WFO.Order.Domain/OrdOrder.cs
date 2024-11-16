@@ -17,14 +17,16 @@ namespace WFO.Order.Domain
         public int Id { get; set; }
         public int CustomerId { get; set; }
         public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
-        public DateTime ShippedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+        public DateTime? ShippedDate { get; set; }
         public DateTime? CanceledDate { get; set; }
+
         /// <summary>
         /// 0 - created
         /// 1 - confirmed
         /// 2 - shipping
-        /// 3 - done (after payment)
+        /// 3 - received
+        /// 5 - done (after payment)
         /// 10 - canceled
         /// </summary>
         [AllowedValues([0, 1, 2, 3, 5, 10], ErrorMessage = "This status is not define")]

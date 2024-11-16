@@ -180,9 +180,35 @@ namespace WFO.Order.ApplicationService.CartModule.Implements
             return result;
         }
 
-        public bool HasItemInCart(int Id, int CustomerId)
+        public bool HasItemInCart(int id, int CustomerId)
         {
-            return _dbContext.Carts.Any(c => c.Id == Id && c.CustomerId == CustomerId);
+            return _dbContext.Carts.Any(c => c.Id == id && c.CustomerId == CustomerId);
+        }
+
+        public CartItemDto GetCartItem(int id)
+        {
+            var item = _dbContext.Carts.FirstOrDefault(c => c.Id == id);
+            if (item != null)
+            {
+                var productItem = _productInforService.GetProduct(item.ProductId);
+
+                return new CartItemDto
+                {
+                    Id = id,
+                    Note = item.Note,
+                    Quantity = item.Quantity,
+                    ProductId = item.ProductId,
+                    ProductName = productItem.Name,
+                    ProductSize = productItem.Size,
+                    ProductImage = productItem.Image,
+                    ProductPrice = productItem.Price,
+                    IsAvailable = productItem.IsAvailable,
+                };
+            }
+            else
+            {
+                throw new Exception($"Không tìm thấy trong giỏ hàng");
+            }
         }
     }
 }
