@@ -24,6 +24,7 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
     {
         private readonly Jwtsettings _jwtsettings;
         private readonly IConfiguration _configuration;
+
         /// <summary>
         /// send mail
         /// </summary>
@@ -72,6 +73,10 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
             var existAccount = _dbContext.Users.FirstOrDefault(acc => acc.Email == input.Email);
             if (existAccount != null)
             {
+                if (existAccount.IsBanned)
+                {
+                    throw new Exception("Email của bạn đã bị cấm");
+                }
                 if (existAccount.Password == input.Password)
                 {
                     var token = CreateToken(existAccount);
@@ -103,7 +108,9 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
 
         public ReturnUserDto UpdateUser(UpdateInforUserDto input, int UserId)
         {
-            var existUser = _dbContext.Users.FirstOrDefault(u => u.Id == UserId);
+            var existUser = _dbContext.Users.FirstOrDefault(u =>
+                u.Id == UserId && u.IsBanned == false
+            );
             if (existUser != null)
             {
                 existUser.FirstName = input.FirstName;
@@ -127,9 +134,32 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
                     Phone = existUser.Phone,
                     FullName = (existUser.FirstName + " " + existUser.LastName).Trim(),
                     Type = existUser.Role,
-                    Token = ""
+                    Token = "",
                 };
                 return result;
+            }
+            else
+            {
+                throw new Exception("Không tìm thấy tài khoản hoặc tài khoản đã bị cấm");
+            }
+        }
+
+        public void DeleteUser(int id)
+        {
+            var existAccount = _dbContext.Users.FirstOrDefault(acc => acc.Id == id);
+            if (existAccount != null)
+            {
+                if (existAccount.Role == "Admin")
+                {
+                    throw new Exception($"Không thể cấm tài khoản này");
+                }
+                else
+                {
+                    existAccount.IsBanned = true;
+
+                    _dbContext.Users.Update(existAccount);
+                    _dbContext.SaveChanges();
+                }
             }
             else
             {
@@ -137,14 +167,11 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
             }
         }
 
-        public void DeleteUser(int id)
-        {
-            throw new NotImplementedException();
-        }
-
         public void ResetPassword(ResetPasswordDto input)
         {
-            var existAccount = _dbContext.Users.FirstOrDefault(u => u.Email == input.Email);
+            var existAccount = _dbContext.Users.FirstOrDefault(u =>
+                u.Email == input.Email && u.IsBanned == false
+            );
             if (existAccount != null)
             {
                 var trueOtp = VerifyOtp(existAccount.Id, input.Otp);
@@ -169,7 +196,7 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
             }
             else
             {
-                throw new Exception("Email chưa được đăng ký tài khoản");
+                throw new Exception("Email chưa được đăng ký tài khoản hoặc đã bị cấm");
             }
         }
 
@@ -230,7 +257,10 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
             // Tạo một đối tượng SmtpClient
             SmtpClient smtpClient = new SmtpClient("smtp.gmail.com");
             smtpClient.Port = 587;
-            smtpClient.Credentials = new NetworkCredential(_configuration["SmtpGmail:senderEmail"], _configuration["SmtpGmail:senderPassword"]);
+            smtpClient.Credentials = new NetworkCredential(
+                _configuration["SmtpGmail:senderEmail"],
+                _configuration["SmtpGmail:senderPassword"]
+            );
             smtpClient.EnableSsl = true;
 
             try

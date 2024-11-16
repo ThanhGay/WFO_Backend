@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WFO.Auth.ApplicationService.UserModule.Abstracts;
+using WFO.Auth.Dtos.Authorization;
 using WFO.Auth.Dtos.UserModule;
 using WFO.Shared.ApplicationService.User;
 
@@ -95,7 +96,7 @@ namespace WFO.WebAPI.Controllers.Auth
             try
             {
                 var customerId = _userInforService.GetCurrentUserId(_contextAccessor);
-                
+
                 return Ok(_userService.UpdateUser(input, customerId));
             }
             catch (Exception ex)
@@ -135,6 +136,22 @@ namespace WFO.WebAPI.Controllers.Auth
             {
                 _userService.ResetPassword(input);
                 return Ok("Mật khẩu đã được thay đổi");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("ban/{userId}")]
+        [Authorize]
+        [AuthorizationFilter("Admin")]
+        public IActionResult Delete(int userId)
+        {
+            try
+            {
+                _userService.DeleteUser(userId);
+                return Ok("Tài khoản đã bị cấm vĩnh viễn");
             }
             catch (Exception ex)
             {

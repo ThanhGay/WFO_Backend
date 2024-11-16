@@ -31,5 +31,6 @@ namespace WFO.Auth.Domain
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public required string Role { get; set; }
+        public bool IsBanned { get; set; } = false;
     }
 }
