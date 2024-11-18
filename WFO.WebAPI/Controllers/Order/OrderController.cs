@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using WFO.Auth.Dtos.Authorization;
 using WFO.Order.ApplicationService.OrderManagementModule.Abstracts;
 using WFO.Order.Dtos.OrderManagementModule;
+using WFO.Order.Dtos.OrderManagementModule.Report;
 using WFO.Shared.ApplicationService.User;
 
 namespace WFO.WebAPI.Controllers.Order
@@ -43,8 +44,8 @@ namespace WFO.WebAPI.Controllers.Order
             }
         }
 
-        [HttpDelete("cancel")]
-        public IActionResult DeleteOrder([FromForm] int orderId)
+        [HttpDelete("cancel/{orderId}")]
+        public IActionResult DeleteOrder(int orderId)
         {
             try
             {
@@ -139,6 +140,20 @@ namespace WFO.WebAPI.Controllers.Order
             {
                 var customerId = _userInforService.GetCurrentUserId(_contextAccessor);
                 return Ok(_orderService.GetDetailOrder(orderId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("statistical")]
+        [AllowAnonymous]
+        public IActionResult GetStatisticalByRange([FromQuery] RangePickerDto input)
+        {
+            try
+            {
+                return Ok(_orderService.ReportByRange(input));
             }
             catch (Exception ex)
             {

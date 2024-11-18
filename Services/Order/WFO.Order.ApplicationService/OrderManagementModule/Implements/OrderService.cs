@@ -9,6 +9,7 @@ using WFO.Order.ApplicationService.Common;
 using WFO.Order.ApplicationService.OrderManagementModule.Abstracts;
 using WFO.Order.Domain;
 using WFO.Order.Dtos.OrderManagementModule;
+using WFO.Order.Dtos.OrderManagementModule.Report;
 using WFO.Order.Infrastructure;
 using WFO.Shared.ApplicationService.Product;
 using WFO.Shared.Dtos.Common;
@@ -83,6 +84,8 @@ namespace WFO.Order.ApplicationService.OrderManagementModule.Implements
                             {
                                 ProductId = od.ProductId,
                                 ProductName = _productInforService.GetProduct(od.ProductId).Name,
+                                ProductImage = _productInforService.GetProduct(od.ProductId).Image,
+                                ProductSize = _productInforService.GetProduct(od.ProductId).Size,
                                 Quantity = od.Quantity,
                                 UnitPrice = od.UnitPrice,
                             }
@@ -326,6 +329,84 @@ namespace WFO.Order.ApplicationService.OrderManagementModule.Implements
                     );
                 }
             }
+        }
+
+        public List<ResultRangePickerDto> ReportByRange(RangePickerDto input)
+        {
+            /*
+             SQL query
+
+            select A.CompletedAt, sum(A.TotalPrice) as TotalAmount
+            from (
+                select o.Id, cast(o.ShippedDate as date) as CompletedAt, sum(od.Quantity * od.UnitPrice) as TotalPrice
+                from ord.OrdOrder as o join ord.OrdOrderDetail as od on o.Id = od.OrderId
+                group by o.Id, o.ShippedDate
+            ) as A
+            group by A.CompletedAt
+            having A.CompletedAt >= '2024-09-21' and A.CompletedAt <= '2024-11-21'
+             */
+
+
+            //var findTonDon = from t in _dbContext.Orders
+            //                 join o in _dbContext.OrderDetails on t.Id equals o.OrderId
+            //                 where t.ShippedDate != null
+            //                 select new
+            //                 {
+            //                     t.Id,
+            //                     t.ShippedDate,
+            //                     o.UnitPrice,
+            //                     o.Quantity,
+            //                 };
+
+            //var group = findTonDon.Where(s => s.ShippedDate.HasValue)
+            //            .GroupBy(x => new { x.ShippedDate, s = x.Quantity * x.UnitPrice }).Select(
+            //            h => new ResultRangePickerDto
+            //            {
+            //                Date = h.Key.ShippedDate,
+            //                Amount = h.Key.s
+            //            }
+            //    ).ToList();
+
+
+            var result = _dbContext
+                .Orders.Join(
+                    _dbContext.OrderDetails,
+                    o => o.Id,
+                    od => od.OrderId,
+                    (o, od) =>
+                        new
+                        {
+                            o.Id,
+                            o.ShippedDate,
+                            od.Quantity,
+                            od.UnitPrice,
+                        }
+                )
+                .Where(x => x.ShippedDate.HasValue)
+                .GroupBy(
+                    x => new
+                    {
+                        x.Id,
+                        CompletedAt = DateOnly.FromDateTime(x.ShippedDate.Value),
+                        s = x.Quantity * x.UnitPrice,
+                    }, // Group by Id and the date part of ShippedDate
+                    x => x.Quantity * x.UnitPrice
+                ) // Calculate TotalPrice (Quantity * UnitPrice)
+                .Select(g => new
+                {
+                    CompletedAt = g.Key.CompletedAt,
+                    TotalPrice = g.Sum(), // Sum the calculated TotalPrice for each group
+                })
+                .Where(x => x.CompletedAt >= input.startDate && x.CompletedAt <= input.endDate)
+                .GroupBy(x => x.CompletedAt)
+                .Select(g => new ResultRangePickerDto
+                {
+                    Date = g.Key,
+                    Amount = g.Sum(x => x.TotalPrice), // Sum the TotalPrice to get TotalAmount per CompletedAt
+                })
+                .ToList();
+
+            return result;
         }
     }
 }
