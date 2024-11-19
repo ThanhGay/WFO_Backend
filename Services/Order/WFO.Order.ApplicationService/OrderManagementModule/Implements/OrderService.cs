@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using WFO.Order.ApplicationService.CartModule.Abstracts;
 using WFO.Order.ApplicationService.Common;
 using WFO.Order.ApplicationService.OrderManagementModule.Abstracts;
@@ -31,6 +26,23 @@ namespace WFO.Order.ApplicationService.OrderManagementModule.Implements
         {
             _cartService = cartService;
             _productInforService = productInforService;
+        }
+
+        public List<OrdOrder> GetAll()
+        {
+            return _dbContext
+                .Orders.Select(o => new OrdOrder
+                {
+                    Id = o.Id,
+                    CanceledDate = o.CanceledDate,
+                    CreatedDate = o.CreatedDate,
+                    CustomerId = o.CustomerId,
+                    ShippedDate = o.ShippedDate,
+                    Status = o.Status,
+                    UpdatedDate = o.UpdatedDate,
+                })
+                .OrderByDescending(c => c.CreatedDate)
+                .ToList();
         }
 
         public PageResultDto<ListOrdersOfCustomerDto> MyOrder(int CustomerId)

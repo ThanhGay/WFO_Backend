@@ -148,12 +148,26 @@ namespace WFO.WebAPI.Controllers.Order
         }
 
         [HttpGet("statistical")]
-        [AllowAnonymous]
+        [AuthorizationFilter("Admin")]
         public IActionResult GetStatisticalByRange([FromQuery] RangePickerDto input)
         {
             try
             {
                 return Ok(_orderService.ReportByRange(input));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("all")]
+        [AuthorizationFilter("Admin")]
+        public IActionResult GetAllOrders()
+        {
+            try
+            {
+                return Ok(_orderService.GetAll());
             }
             catch (Exception ex)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WFO.Order.Domain;
 using WFO.Order.Dtos.OrderManagementModule;
 using WFO.Order.Dtos.OrderManagementModule.Report;
 using WFO.Shared.Dtos.Common;
@@ -19,6 +20,7 @@ namespace WFO.Order.ApplicationService.OrderManagementModule.Abstracts
         public void CustomerConfirmReceive(int OrderId, int CustomerId);
         public void SucceededOrder(int OrderId);
         public void CancelOrder(int OrderId, int CustomerId);
-        List<ResultRangePickerDto> ReportByRange(RangePickerDto input);
+        public List<ResultRangePickerDto> ReportByRange(RangePickerDto input);
+        public List<OrdOrder> GetAll();
     }
 }
