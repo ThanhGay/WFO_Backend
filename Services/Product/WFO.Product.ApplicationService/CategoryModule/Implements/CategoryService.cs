@@ -84,6 +84,8 @@ namespace WFO.Product.ApplicationService.CategoryModule.Implements
                 Name = c.Name,
                 Id = c.Id,
                 Image = c.Image,
+                CreatedDate = c.CreatedDate,
+                UpdateDate = c.UpdateDate,
             });
 
             if (!string.IsNullOrEmpty(input.Keyword))

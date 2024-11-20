@@ -297,6 +297,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
                                 .Categories.Where(c => c.Id == pc.CategoryId)
                                 .Select(c => c.Name)
                                 .ToList(),
+                            prod.IsAvailable,
                         }
                 )
                 .Select(p => new ProductDto
@@ -309,6 +310,7 @@ namespace WFO.Product.ApplicationService.ProductManagerModule.Implements
                     Price = p.Price,
                     CategoryId = p.CategoryId,
                     CategoryName = p.CategoryName[0],
+                    IsAvailable = p.IsAvailable,
                 });
 
             if (!string.IsNullOrEmpty(input.Keyword))
