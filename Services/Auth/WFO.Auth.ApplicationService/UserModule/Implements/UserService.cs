@@ -178,6 +178,7 @@ namespace WFO.Auth.ApplicationService.UserModule.Implements
                 if (trueOtp)
                 {
                     existAccount.OTP = null;
+                    existAccount.Password = input.NewPassword;
                     _dbContext.SaveChanges();
                     wrongOTP = 0;
                 }
